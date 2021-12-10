@@ -1,39 +1,40 @@
 from flask import Flask, render_template, request, redirect
 import pandas as pd
-import base64
+from os import listdir
+from os.path import isfile, join
 
 # Initialize the application
 app = Flask(__name__)
 
-# Google Drive
-
-# Convert to onedrive direct download link
-def create_onedrive_directdownload (onedrive_link):
-    data_bytes64 = base64.b64encode(bytes(onedrive_link, 'utf-8'))
-    data_bytes64_String = data_bytes64.decode('utf-8').replace('/','_').replace('+','-').rstrip("=")
-    resultUrl = f"https://api.onedrive.com/v1.0/shares/u!{data_bytes64_String}/root/content"
-    return resultUrl
-
-link = 'https://1drv.ms/u/s!AvbEtDUlZl2lb1f1QG4U5a4X_1E?e=mHKzS6'
-directLink = create_onedrive_directdownload(link)
-
 # Import the data
-fileData = pd.read_csv(directLink)
-headings = fileData.columns
+myPath = "G:/My Drive/Data"
+onlyFiles = [f for f in listdir(myPath) if isfile(join(myPath, f))]
+data = [] # Will store as fileName, Headers, Content
+for file in onlyFiles:
+    # Read File
+    currFile = [file]
+    fileData = pd.read_csv(myPath + '/' + file)
+    headings = fileData.columns
+    requiredColumns = ["Name", "Average", "Standard Deviation"]
+    currFile.append(requiredColumns)
 
-# Data Analysis
-results = pd.DataFrame(columns = ["Name", "Average", "Standard Deviation"])
-for col in headings:
-    if col != "Date":
-        average = fileData[col].mean()
-        standardDeviation = fileData[col].std()
-        results = results.append({
-            'Name': col,
-            'Average': round(average, 3),
-            'Standard Deviation': round(standardDeviation, 3)
-        }, ignore_index = True)
-headings = results.columns 
-data = results.values
+    # Data Analysis
+    results = pd.DataFrame(columns = requiredColumns)
+    for col in headings:
+        if col != "Date":
+            average = fileData[col].mean()
+            standardDeviation = fileData[col].std()
+            results = results.append({
+                'Name': col,
+                'Average': round(average, 3),
+                'Standard Deviation': round(standardDeviation, 3)
+            }, ignore_index = True)
+
+    # Add data to file
+    currFile.append(results.values)
+    data.append(currFile)
+
+print(data)
 
 @app.route('/', methods = ['POST', 'GET'])
 def index():
@@ -48,7 +49,7 @@ def index():
         #     return "There was an issue adding the data!"
         pass
     else:
-        return render_template('index.html', headings = headings, data = data)
+        return render_template('index.html', data = data)
 
 # If there is a need for update and delete, please tweak this code
 

@@ -6,14 +6,15 @@
 
 {% block body %}
 <div class = "content">
-    <h1 style = "text-align: center">Data Summary</h1>
+    {% for file in data %}
+    <h1 style = "text-align: center">{{ file[0] }}</h1>
     <table>
         <tr>
-            {% for header in headings %}
+            {% for header in file[1] %}
             <th>{{ header }}</th>
             {% endfor %}
         </tr>
-        {% for row in data %}
+        {% for row in file[2] %}
         <tr>
             {% for cell in row %}
             <td>{{ cell }}</td>
@@ -21,6 +22,7 @@
         </tr>
         {% endfor %}
     </table>
+    {% endfor %}
 
     <!-- <form action = "/" method = "POST">
         <input type = "text" name = "content" id = "content">
