@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Summary</title>
+{% endblock %}
+
+{% block body %}
+<div class = "content">
+    <h1 style = "text-align: center">Data Summary</h1>
+    <table>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+        <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- <form action = "/" method = "POST">
+        <input type = "text" name = "content" id = "content">
+        <input type = "submit" value = "Add Task">
+    </form> -->
+</div>
+{% endblock %}
