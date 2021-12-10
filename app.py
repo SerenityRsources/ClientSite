@@ -34,8 +34,6 @@ for file in onlyFiles:
     currFile.append(results.values)
     data.append(currFile)
 
-print(data)
-
 @app.route('/', methods = ['POST', 'GET'])
 def index():
     if request.method == "POST":
