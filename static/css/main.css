@@ -1,7 +1,7 @@
 body, html {
     margin: 0;
     font-family: sans-serif;
-    background-color: lightblue;
+    background-image: linear-gradient(to right, lightblue, pink);
 }
 
 .content {
@@ -9,8 +9,13 @@ body, html {
     width: 400px;
 }
 
+.fileName {
+    text-align: center;
+    font-size: 25px
+}
+
 table, td, th {
-    border: 1px solid #aaa;
+    border: 4px solid #aaa;
 }
 
 table {
