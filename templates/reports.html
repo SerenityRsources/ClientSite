@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Reports</title>
+{% endblock %}
+
+{% block body %}
+<div class = "report-content">
+    <table class="report-table">
+        {% for file in data %}
+        <tr>
+            <a class="report-links" href= {{ file[1] }}>{{ file[0] }}</a>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

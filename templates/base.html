@@ -8,6 +8,16 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <header>
+        <!-- <img src="#" alt="Logo" class="logo"> -->
+        <nav>
+            <ul class="nav_links">
+                <li><a href={{url_for("index")}}>Data Summary</a></li>
+                <li><a href={{url_for("reports")}}>Daily Reports</a></li>
+            </ul>
+        </nav>
+        <!-- <a class="cta" href="#"><button>Contact</button></a> -->
+    </header>
     {% block body %}{% endblock %}
 </body>
 </html>

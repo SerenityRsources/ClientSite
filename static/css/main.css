@@ -1,7 +1,18 @@
-body, html {
+/* Importing fonts */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
+/* Styling for App.py */
+
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+    background-color: lightblue;
+}
+
+body, html {
     font-family: sans-serif;
-    background-image: linear-gradient(to right, lightblue, pink);
 }
 
 .content {
@@ -11,7 +22,9 @@ body, html {
 
 .fileName {
     text-align: center;
-    font-size: 25px
+    font-size: 25px;
+    padding-bottom: 10px;
+    padding-top: 10px;
 }
 
 table, td, th {
@@ -37,5 +50,75 @@ td {
 }
 
 #content {
-    width: 70%;
+    width: 100%;
+}
+
+/* Navigation Bar Styling */
+
+li, a, button {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: white;
+    background-color: gray;
+    text-decoration: none;
+}
+
+header {
+    display: flex;
+    /* justify-content: center; */
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 0;
+    background-color: gray;
+}
+
+/* .logo {
+    cursor: pointer;
+} */
+
+.nav_links {
+    list-style: none;
+}
+
+.nav_links li {
+    display: inline-block;
+    padding: 0px 44px;
+}
+
+.nav_links li a {
+    transition: all 0.3s ease 0s;
+}
+
+.nav_links li a:hover {
+    color: #0088a9;
+}
+
+/* button {
+    padding: 9px 25px;
+    background-color: rgba(0, 136, 169, 1);
+    border: node;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+}
+
+button:hover {
+    background-color: rgba(0, 136, 169, 0.75);
+} */
+
+/* Styling for Reports Page */
+
+.report-content {
+    align-self: left;
+    width: 222px;
+}
+
+.report-links {
+    display: block;
+    background-color: lightblue;
+    text-align: center;
+    font-size: 25px;
+    padding-top: 10px;
+    color: blueviolet;
 }

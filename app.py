@@ -1,4 +1,5 @@
 # Basic Libraries
+from webbrowser import get
 from flask import Flask, render_template, request
 import pandas as pd
 
@@ -123,19 +124,18 @@ def emptyTrash():
     service.files().emptyTrash().execute()
 
 # Download files from Google Drive
-def download():
+def download(folderId):
     service = get_gdrive_service()
     # Get all the files in the "Data" folder
     # Empty the trash folder else it would return the deleted files
     emptyTrash()
     # Retrieve all files
     results = service.files().list(
-        pageSize = 5, fields="nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)").execute()
+        fields="nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)").execute()
     items = results.get('files', [])
     itemNames = list_files(items)
     # Get all items in folder
     requiredFiles = []
-    folderId = "1KdVZUKTdpyv_6Q35Rlm4yIaLyJcxIgH6"
     for file in itemNames:
         if file[2][0] == folderId:
             requiredFiles.append(file[1])
@@ -195,10 +195,20 @@ def download_file_from_google_drive(id, destination):
     # Download to disk
     save_response_content(response, destination)  
 
+# Get Download Link
+def getDownloadLink(id):
+    # Base URL for download
+    URL = "https://docs.google.com/uc?export=download"
+    # Init a HTTP session
+    session = requests.Session()
+    # Make a request
+    response = session.get(URL, params = {'id': id}, stream=True)
+    return response
+
 # Getting files from Google Drive
 def getData():
     emptyTrash()
-    requiredFiles = download() # Download files to present
+    requiredFiles = download("1KdVZUKTdpyv_6Q35Rlm4yIaLyJcxIgH6") # Download files to present
 
     # Import the data
     data = [] # Will store as fileName, Headers, Content
@@ -228,6 +238,29 @@ def getData():
 
     return data
 
+def getLinks(folderId):
+    service = get_gdrive_service()
+    # Get all the files in the "Data" folder
+    # Empty the trash folder else it would return the deleted files
+    emptyTrash()
+    # Retrieve all files
+    results = service.files().list(
+        fields="nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)").execute()
+    items = results.get('files', [])
+    itemNames = list_files(items)
+    # Get all items in folder
+    requiredFiles = []
+    for file in itemNames:
+        if file[2][0] == folderId:
+            requiredFiles.append((file[1], getDownloadLink(file[0]).url))
+    return requiredFiles
+
+def getReports():
+    emptyTrash()
+    requiredFiles = getLinks("1YEFtX-GzxARNsZ64J18OZLPOiPZZiT2B") # Download files to present
+    print(requiredFiles)
+    return requiredFiles
+
 @app.route('/', methods = ['POST', 'GET'])
 def index():
     if request.method == "POST":
@@ -237,6 +270,13 @@ def index():
             return render_template('index.html', data = getData())
         except:
             return render_template('error.html')
+
+@app.route('/reports', methods = ['POST', 'GET'])
+def reports():
+    try:
+        return render_template('reports.html', data = getReports())
+    except:
+        return render_template('error.html')
 
 if __name__ == "__main__":
     app.run(debug = True)
