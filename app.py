@@ -93,11 +93,11 @@ def list_files(items):
             modified_time = item["modifiedTime"]
             # Append everything to the list
             rows.append((id, name, parents, size, mime_type, modified_time))
-        print("Files:")
-        # Convert to a human readable table
-        table = tabulate(rows, headers = ["ID", "Name", "Parents", "Size", "Type", "Modified Time"])
-        # Print the table
-        print(table)
+        # print("Files:")
+        # # Convert to a human readable table
+        # table = tabulate(rows, headers = ["ID", "Name", "Parents", "Size", "Type", "Modified Time"])
+        # # Print the table
+        # print(table)
         return rows
 
 # Search for a file
@@ -138,17 +138,17 @@ def download(folderId):
     requiredFiles = []
     for file in itemNames:
         if file[2][0] == folderId:
-            requiredFiles.append(file[1])
+            requiredFiles.append((file[1], file[0]))
     for fileName in requiredFiles:
         # Search for the file by name
-        search_result = search(service, query = f"name = '{fileName}'")
+        search_result = search(service, query = f"name = '{fileName[0]}'")
         print(search_result)
         # Get the GDrive ID of the file
         file_id = search_result[0][0]
         # Make it shareable
         service.permissions().create(body = {"role": "reader", "type": "anyone"}, fileId = file_id).execute()
         # Download file
-        download_file_from_google_drive(file_id, fileName)
+        download_file_from_google_drive(file_id, fileName[0])
     return requiredFiles
 
 # Download file from Google Drive
@@ -214,8 +214,8 @@ def getData():
     data = [] # Will store as fileName, Headers, Content
     for file in requiredFiles:
         # Read File
-        currFile = [file]
-        fileData = pd.read_csv(file)
+        currFile = [file[0]]
+        fileData = pd.read_csv(file[0])
         headings = fileData.columns
         requiredColumns = ["Name", "Average", "Standard Deviation"]
         currFile.append(requiredColumns)
@@ -234,9 +234,58 @@ def getData():
 
         # Add data to file
         currFile.append(results.values)
+        currFile.append(getDownloadLink(file[1]).url)
         data.append(currFile)
 
     return data
+
+def downloadOne(folderId):
+    service = get_gdrive_service()
+    # Get all the files in the "Data" folder
+    # Empty the trash folder else it would return the deleted files
+    emptyTrash()
+    # Retrieve all files
+    results = service.files().list(
+        fields="nextPageToken, files(id, name, mimeType, size, parents, modifiedTime)").execute()
+    items = results.get('files', [])
+    itemNames = list_files(items)
+    # Get all items in folder
+    requiredFiles = []
+    for file in itemNames:
+        if file[2][0] == folderId:
+            requiredFiles.append((file[1], file[0]))
+    print(requiredFiles)
+    requiredFiles.sort(reverse = True)
+    requiredFiles = [requiredFiles[0]]
+    for fileName in requiredFiles:
+        # Search for the file by name
+        search_result = search(service, query = f"name = '{fileName[0]}'")
+        print(search_result)
+        # Get the GDrive ID of the file
+        file_id = search_result[0][0]
+        # Make it shareable
+        service.permissions().create(body = {"role": "reader", "type": "anyone"}, fileId = file_id).execute()
+        # Download file
+        download_file_from_google_drive(file_id, fileName[0])
+    return requiredFiles
+
+def getHTML(type):
+    emptyTrash()
+    APR_FolderId = "1uFNfMoGNl6fPCoCRXoRpXciKIQkZcNiE"
+    TVL_FolderId = "1M7hg87R74-AJS7XaHbKvYEJRL3wy4oDe"
+
+    if type == "APR":
+        requiredFiles = downloadOne(APR_FolderId)
+    elif type == "TVL":
+        requiredFiles = downloadOne(TVL_FolderId)
+    else:
+        return "No such folder"
+
+    # Import the data
+    requiredFiles.sort(reverse = True)
+    requiredFiles = requiredFiles[0]
+    df = pd.read_csv(requiredFiles[0], header = [0, 1, 2])
+    return df
 
 def getLinks(folderId):
     service = get_gdrive_service()
@@ -257,8 +306,8 @@ def getLinks(folderId):
 
 def getReports():
     emptyTrash()
-    requiredFiles = getLinks("1YEFtX-GzxARNsZ64J18OZLPOiPZZiT2B") # Download files to present
-    print(requiredFiles)
+    requiredFiles = getLinks("1B2Eqc0VJnsoS6T_69wKO7C2BOE9yP5QL") # Download files to present
+    requiredFiles.sort(reverse = True)
     return requiredFiles
 
 @app.route('/', methods = ['POST', 'GET'])
@@ -275,6 +324,25 @@ def index():
 def reports():
     try:
         return render_template('reports.html', data = getReports())
+    except:
+        return render_template('error.html')
+
+@app.route('/TVL', methods = ['POST', 'GET'])
+def TVL():
+    try:
+        df = getHTML("TVL")
+        df.columns = df.columns.map('_'.join)
+        df.rename_axis('Date').reset_index()
+        return render_template('TVL.html',  tables = [df.to_html(classes = "data", index = False)])
+    except:
+        return render_template('error.html')
+
+@app.route('/APR', methods = ['POST', 'GET'])
+def APR():
+    try:
+        df = getHTML("APR")
+        df = df.rename(columns = {'Unnamed: 0_level_1': 'Currency 1', 'Unnamed: 0_level_2': 'Currency 2'})
+        return render_template('APR.html',  tables = [df.to_html(classes = "data", index = False)])
     except:
         return render_template('error.html')
 

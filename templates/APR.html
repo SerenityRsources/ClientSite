@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Summary</title>
+{% endblock %}
+
+{% block body %}
+<div class="table">
+    <h1 style="margin-top: 10px; margin-bottom: 10px; text-align: center;">Portfolio Summary - APR</h1>
+    {% for table in tables %}
+        {{ table|safe }}
+    {% endfor %}
+</div>
+{% endblock %}

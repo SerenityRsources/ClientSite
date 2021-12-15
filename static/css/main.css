@@ -122,3 +122,15 @@ button:hover {
     padding-top: 10px;
     color: blueviolet;
 }
+
+/* Tables CSS */
+
+.dataframe {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.dataframe thead tr {
+    text-align: center;
+}

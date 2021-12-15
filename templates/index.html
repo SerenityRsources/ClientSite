@@ -7,7 +7,9 @@
 {% block body %}
 <div class = "content">
     {% for file in data %}
-    <h1 class = "fileName">{{ file[0] }}</h1>
+    <h1 class = "fileName">
+        <a href={{ file[3] }} class="report-links">{{ file[0] }}</a>
+    </h1>
     <table>
         <tr>
             {% for header in file[1] %}
