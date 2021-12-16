@@ -2,6 +2,8 @@
 from webbrowser import get
 from flask import Flask, render_template, request
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Libraries used by Google Drive API
 import pickle
@@ -285,6 +287,18 @@ def getHTML(type):
     requiredFiles.sort(reverse = True)
     requiredFiles = requiredFiles[0]
     df = pd.read_csv(requiredFiles[0], header = [0, 1, 2])
+    df = df.rename(columns = {'Unnamed: 0_level_1': 'Currency 1', 'Unnamed: 0_level_2': 'Currency 2'})
+    return df    
+
+def convertToPercentage(df, type):
+    for col in df.columns:
+        if col == ('Date', 'Currency 1', 'Currency 2'):
+            pass
+        else:
+            if type == "APR":
+                df[col] = df[col].apply(lambda x: str(int(np.floor(x * 100))) + "%")
+            else:
+                df[col] = df[col].apply(lambda x: str(int(np.floor(x))) + "%")
     return df
 
 def getLinks(folderId):
@@ -310,6 +324,18 @@ def getReports():
     requiredFiles.sort(reverse = True)
     return requiredFiles
 
+def getAPRGraphs():
+    numGraphs = 0
+    df = getHTML("APR")
+    fig = df.plot()
+    plt.savefig('./static/graphs/APR/Line.png')
+
+def getTVLGraphs():
+    numGraphs = 0
+    df = getHTML("TVL")
+    fig = df.plot()
+    plt.savefig('./static/graphs/TVL/Line.png')
+
 @app.route('/', methods = ['POST', 'GET'])
 def index():
     if request.method == "POST":
@@ -331,8 +357,7 @@ def reports():
 def TVL():
     try:
         df = getHTML("TVL")
-        df.columns = df.columns.map('_'.join)
-        df.rename_axis('Date').reset_index()
+        df = convertToPercentage(df, "TVL")
         return render_template('TVL.html',  tables = [df.to_html(classes = "data", index = False)])
     except:
         return render_template('error.html')
@@ -341,8 +366,24 @@ def TVL():
 def APR():
     try:
         df = getHTML("APR")
-        df = df.rename(columns = {'Unnamed: 0_level_1': 'Currency 1', 'Unnamed: 0_level_2': 'Currency 2'})
+        df = convertToPercentage(df, "APR")
         return render_template('APR.html',  tables = [df.to_html(classes = "data", index = False)])
+    except:
+        return render_template('error.html')
+
+@app.route('/APR/Graphs', methods = ['POST', 'GET'])
+def APRGraphs():
+    try:
+        getAPRGraphs()
+        return render_template('APRGraph.html')
+    except:
+        return render_template('error.html')
+
+@app.route('/TVL/Graphs', methods = ['POST', 'GET'])
+def TVLGraphs():
+    try:
+        getTVLGraphs()
+        return render_template('TVLGraph.html')
     except:
         return render_template('error.html')
 

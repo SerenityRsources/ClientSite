@@ -8,11 +8,12 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: lightblue;
+    /* background-color: lightblue; */
 }
 
 body, html {
     font-family: sans-serif;
+    background-color: lightblue;
 }
 
 .content {
@@ -116,11 +117,11 @@ button:hover {
 
 .report-links {
     display: block;
-    background-color: lightblue;
     text-align: center;
     font-size: 25px;
     padding-top: 10px;
     color: blueviolet;
+    background-color: lightblue;
 }
 
 /* Tables CSS */
@@ -128,9 +129,30 @@ button:hover {
 .dataframe {
     margin-top: 10px;
     text-align: center;
-    font-size: 10px;
+    font-size: 16px;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
-.dataframe thead tr {
+.dataframe thead {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: lightcoral;
+}
+
+/* Styling for graphs */
+
+.graph-title {
+    font-weight: bold;
+    font-size: 36px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}  
+
+.graph-content {
+    width: 100%;
     text-align: center;
 }

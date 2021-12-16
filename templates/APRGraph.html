@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>APR Graphs</title>
+{% endblock %}
+
+{% block body %}
+<div class = "graph-content">
+    <h1 class="graph-title">Line Graph</h1>
+    <img class="graph" src="{{ url_for('static', filename = 'graphs/APR/Line.png') }}"/>
+</div>
+{% endblock %}
