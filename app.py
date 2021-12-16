@@ -4,6 +4,7 @@ from flask import Flask, render_template, request
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 # Libraries used by Google Drive API
 import pickle
@@ -325,16 +326,46 @@ def getReports():
     return requiredFiles
 
 def getAPRGraphs():
-    numGraphs = 0
     df = getHTML("APR")
-    fig = df.plot()
-    plt.savefig('./static/graphs/APR/Line.png')
+    print(df)
+    columns = df.columns
+    graphPairs = []
+    for i in range(1, len(columns)):
+        pair = columns[i]
+        title = str(pair[0]) + " - " + str(pair[1]) + " & " + str(pair[2])
+        link = '../static/graphs/APR/' + title + '.png'
+        fig, ax = plt.subplots(figsize = (8, 6))
+        multipliedCol = df[columns[1]] * 100
+        fig = plt.plot(df[columns[0]], multipliedCol)
+        plt.grid()
+        plt.axhline(y = 15, linewidth = 2, color = 'r')
+        plt.axhline(y = 20, linewidth = 2, color = 'r')
+        tickSpacing = 5
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(tickSpacing))
+        plt.gca().xaxis.set_tick_params(rotation = 30)  
+        plt.savefig("./static/graphs/APR/" + title + ".png")
+        graphPairs.append((title, link))
+    return graphPairs
 
 def getTVLGraphs():
-    numGraphs = 0
     df = getHTML("TVL")
-    fig = df.plot()
-    plt.savefig('./static/graphs/TVL/Line.png')
+    columns = df.columns
+    graphPairs = []
+    for i in range(1, len(columns)):
+        pair = columns[i]
+        title = str(pair[0]) + " - " + str(pair[1]) + " & " + str(pair[2])
+        link = '../static/graphs/TVL/' + title + '.png'
+        fig, ax = plt.subplots(figsize = (8, 6))
+        fig = plt.plot(df[columns[0]], df[columns[1]])
+        plt.grid()
+        plt.axhline(y = 15, linewidth = 2, color = 'r')
+        plt.axhline(y = 20, linewidth = 2, color = 'r')
+        tickSpacing = 5
+        ax.xaxis.set_major_locator(ticker.MultipleLocator(tickSpacing))
+        plt.gca().xaxis.set_tick_params(rotation = 30)  
+        plt.savefig("./static/graphs/TVL/" + title + ".png")
+        graphPairs.append((title, link))
+    return graphPairs
 
 @app.route('/', methods = ['POST', 'GET'])
 def index():
@@ -374,16 +405,14 @@ def APR():
 @app.route('/APR/Graphs', methods = ['POST', 'GET'])
 def APRGraphs():
     try:
-        getAPRGraphs()
-        return render_template('APRGraph.html')
+        return render_template('APRGraph.html', graphs = getAPRGraphs())
     except:
         return render_template('error.html')
 
 @app.route('/TVL/Graphs', methods = ['POST', 'GET'])
 def TVLGraphs():
     try:
-        getTVLGraphs()
-        return render_template('TVLGraph.html')
+        return render_template('TVLGraph.html', graphs = getTVLGraphs())
     except:
         return render_template('error.html')
 

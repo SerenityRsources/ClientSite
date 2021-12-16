@@ -6,7 +6,9 @@
 
 {% block body %}
 <div class = "graph-content">
-    <h1 class="graph-title">Line Graph</h1>
-    <img class="graph" src="{{ url_for('static', filename = 'graphs/TVL/Line.png') }}"/>
+    {% for graph in graphs %}
+        <h1 class = "graph-title">{{ graph[0] }}</h1>
+        <img src="{{ graph[1] }}"/>
+    {% endfor %}
 </div>
 {% endblock %}
