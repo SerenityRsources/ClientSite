@@ -1,6 +1,7 @@
 # Basic Libraries
 from webbrowser import get
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_wtf.form import FlaskForm
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +18,15 @@ import requests
 from tqdm import tqdm
 from tabulate import tabulate
 
+# Athentication
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
+from flask_bcrypt import Bcrypt
+import json
+
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = [
           'https://www.googleapis.com/auth/drive.metadata',
@@ -26,6 +36,25 @@ SCOPES = [
 
 # Initialize the application
 app = Flask(__name__)
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
+# Config Key
+def get_keys(path):
+    with open(path) as f:
+        return json.load(f)
+print(get_keys("./secrets.json")["Secret_Key"])
+app.config['SECRET_KEY'] = get_keys("./secrets.json")["Secret_Key"]
+
+# Login Stuff
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # Functions
 
@@ -367,17 +396,104 @@ def getTVLGraphs():
         graphPairs.append((title, link))
     return graphPairs
 
-@app.route('/', methods = ['POST', 'GET'])
-def index():
+# Authentication System
+
+# Run python and do db.create_all() to create the tables in an empty database
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(25), nullable = False, unique = True)
+    password = db.Column(db.String(50), nullable = False)
+
+class RegisterForm(FlaskForm):
+    username = StringField(validators = [InputRequired(), Length(min = 5, max = 25)], render_kw = {"placeholder": "Username"})
+    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Password"})
+    passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Repeat Password"})
+    submit = SubmitField("Register")
+
+    def validate_username(self, username):
+        existing_user_username = User.query.filter_by(username = username.data).first()
+        if existing_user_username:
+            raise ValidationError("Username already exists! Please choose a different one!")
+
+class LoginForm(FlaskForm):
+    username = StringField(validators = [InputRequired(), Length(min = 5, max = 25)], render_kw = {"placeholder": "Username"})
+    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Password"})
+    submit = SubmitField("Login")
+
+def flash_errors(form):
+    """Flashes form errors"""
+    for field, errors in form.errors.items():
+        for error in errors:
+            if error == "Field must be equal to password.":
+                flash('Passwords did not match!', 'danger')
+            else:
+                flash(u"%s" % error, 'danger')
+            break
+        break
+
+# Routes
+
+@app.route('/home', methods = ['POST', 'GET'])
+@login_required
+def home():
     if request.method == "POST":
         pass
     else:
         try:
-            return render_template('index.html', data = getData())
+            # return render_template('index.html', data = getData())
+            return render_template('index.html')
         except:
             return render_template('error.html')
 
+@app.route('/', methods = ['POST', 'GET'])
+@app.route('/login', methods = ['POST', 'GET'])
+def login():
+    form = LoginForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            user = User.query.filter_by(
+                username = form.username.data
+            ).first()
+            if user:
+                if bcrypt.check_password_hash(user.password, form.password.data):
+                    login_user(user)
+                    return redirect(url_for('home'))
+                else:
+                    flash(f'Wrong password!', category = 'danger')
+            else:
+                flash(f'Username does not exist!', category = 'danger')
+        else:
+            flash_errors(form)
+    return render_template('login.html', form  = form)
+
+@app.route('/logout', methods = ["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.route('/register', methods = ['POST', 'GET'])
+def register():
+    form = RegisterForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            hashed_password = bcrypt.generate_password_hash(form.password.data)
+            new_user = User(
+                username = form.username.data,
+                password = hashed_password
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            flash(f'Account successfully created! Please login now!',
+                category='success')
+            return redirect(url_for('login'))
+        else:
+            flash_errors(form)
+    return render_template('register.html', form = form)
+
 @app.route('/reports', methods = ['POST', 'GET'])
+@login_required
 def reports():
     try:
         return render_template('reports.html', data = getReports())
@@ -385,6 +501,7 @@ def reports():
         return render_template('error.html')
 
 @app.route('/TVL', methods = ['POST', 'GET'])
+@login_required
 def TVL():
     try:
         df = getHTML("TVL")
@@ -394,6 +511,7 @@ def TVL():
         return render_template('error.html')
 
 @app.route('/APR', methods = ['POST', 'GET'])
+@login_required
 def APR():
     try:
         df = getHTML("APR")
@@ -403,6 +521,7 @@ def APR():
         return render_template('error.html')
 
 @app.route('/APR/Graphs', methods = ['POST', 'GET'])
+@login_required
 def APRGraphs():
     try:
         return render_template('APRGraph.html', graphs = getAPRGraphs())
@@ -410,6 +529,7 @@ def APRGraphs():
         return render_template('error.html')
 
 @app.route('/TVL/Graphs', methods = ['POST', 'GET'])
+@login_required
 def TVLGraphs():
     try:
         return render_template('TVLGraph.html', graphs = getTVLGraphs())

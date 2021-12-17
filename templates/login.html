@@ -1,0 +1,22 @@
+{% extends 'authbase.html' %}
+
+{% block head %}
+<title>Login</title>
+{% endblock %}
+
+{% block body %}
+    <div class="auth-form">
+        <div class="auth-items">
+            <h1 class="auth-title">Login</h1>
+
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <div class="auth-line">{{ form.username }}</div>
+                <div class="auth-line">{{ form.password }}</div>
+                <div class="auth-line">{{ form.submit }}</div>
+            </form>
+
+            <a class="login-redirect" href="{{ url_for('register') }}">Don't have an account? Sign up here!</a>
+        </div>
+    </div>
+{% endblock %}
