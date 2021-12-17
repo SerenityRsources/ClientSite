@@ -6,14 +6,15 @@
 
 {% block body %}
     <div class="auth-form">
+        <img src="../static/logo.jpg" alt="Logo" class="logo">
         <div class="auth-items">
-            <h1 class="auth-title">Login</h1>
+            <h1 class="auth-desc">Login</h1>
 
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
-                <div class="auth-line">{{ form.username }}</div>
-                <div class="auth-line">{{ form.password }}</div>
-                <div class="auth-line">{{ form.submit }}</div>
+                <div class="auth-line">{{ form.username(class_="auth-field") }}</div>
+                <div class="auth-line">{{ form.password(class_="auth-field") }}</div>
+                <div class="auth-line">{{ form.submit(class_="auth-btn") }}</div>
             </form>
 
             <a class="login-redirect" href="{{ url_for('register') }}">Don't have an account? Sign up here!</a>
