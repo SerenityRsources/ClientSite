@@ -45,7 +45,7 @@ def get_keys(path):
     with open(path) as f:
         return json.load(f)
 print(get_keys("./secrets.json")["Secret_Key"])
-app.config['SECRET_KEY'] = get_keys("./secrets.json")["Secret_Key"]
+app.config['SECRET_KEY'] = "Serenity070598"
 
 # Login Stuff
 login_manager = LoginManager()
