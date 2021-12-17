@@ -41,10 +41,6 @@ bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
 # Config Key
-def get_keys(path):
-    with open(path) as f:
-        return json.load(f)
-print(get_keys("./secrets.json")["Secret_Key"])
 app.config['SECRET_KEY'] = "Serenity070598"
 
 # Login Stuff
