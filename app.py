@@ -457,7 +457,8 @@ def login():
                 username = form.username.data
             ).first()
             if user:
-                if bcrypt.check_password_hash(user.password, form.password.data.decode("utf-8", "ignore")):
+                # if bcrypt.check_password_hash(user.password, form.password.data):
+                if user.password == form.password.data:
                     login_user(user)
                     return redirect(url_for('home'))
                 else:
@@ -479,10 +480,10 @@ def register():
     form = RegisterForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8", "ignore")
+            # hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8", "ignore")
             new_user = User(
                 username = form.username.data,
-                password = hashed_password
+                password = form.password.data
             )
             db.session.add(new_user)
             db.session.commit()
