@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import keyring
 
 # Libraries used by Google Drive API
 import pickle
@@ -38,10 +39,10 @@ SCOPES = [
 app = Flask(__name__)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
 # Config Key
-app.config['SECRET_KEY'] = "Serenity070598"
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 # Login Stuff
 login_manager = LoginManager()
