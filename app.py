@@ -409,7 +409,7 @@ class User(db.Model, UserMixin):
 class RegisterForm(FlaskForm):
     username = StringField(validators = [InputRequired(), Length(min = 5, max = 100)], render_kw = {"placeholder": "Username"})
     password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 100)], render_kw = {"placeholder": "Password"})
-    passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Repeat Password"})
+    passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 100)], render_kw = {"placeholder": "Repeat Password"})
     submit = SubmitField("Register")
 
     def validate_username(self, username):
