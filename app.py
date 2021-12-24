@@ -27,6 +27,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError, EqualTo
 from flask_bcrypt import Bcrypt
 import json
+from boto.s3.connection import S3Connection
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = [
@@ -34,6 +35,9 @@ SCOPES = [
           'https://www.googleapis.com/auth/drive',
           'https://www.googleapis.com/auth/drive.file'
          ]
+
+# Initialise Heroku
+s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 
 # Initialize the application
 app = Flask(__name__)
