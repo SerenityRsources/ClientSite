@@ -407,9 +407,9 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(50), nullable = False)
 
 class RegisterForm(FlaskForm):
-    username = StringField(validators = [InputRequired(), Length(min = 5, max = 100)], render_kw = {"placeholder": "Username"})
-    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 100)], render_kw = {"placeholder": "Password"})
-    passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 100)], render_kw = {"placeholder": "Repeat Password"})
+    username = StringField(validators = [InputRequired(), Length(min = 5, max = 50)], render_kw = {"placeholder": "Username"})
+    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 160)], render_kw = {"placeholder": "Password"})
+    passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 160)], render_kw = {"placeholder": "Repeat Password"})
     submit = SubmitField("Register")
 
     def validate_username(self, username):
@@ -418,8 +418,8 @@ class RegisterForm(FlaskForm):
             raise ValidationError("Username already exists! Please choose a different one!")
 
 class LoginForm(FlaskForm):
-    username = StringField(validators = [InputRequired(), Length(min = 5, max = 25)], render_kw = {"placeholder": "Username"})
-    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Password"})
+    username = StringField(validators = [InputRequired(), Length(min = 5, max = 50)], render_kw = {"placeholder": "Username"})
+    password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 160)], render_kw = {"placeholder": "Password"})
     submit = SubmitField("Login")
 
 def flash_errors(form):
