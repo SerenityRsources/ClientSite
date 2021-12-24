@@ -410,6 +410,7 @@ class RegisterForm(FlaskForm):
     username = StringField(validators = [InputRequired(), Length(min = 5, max = 25)], render_kw = {"placeholder": "Username"})
     password = PasswordField(validators = [InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Password"})
     passwordRepeat = PasswordField(validators = [EqualTo('password'), InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Repeat Password"})
+    validationCode = PasswordField(validators = [InputRequired(), Length(min = 7, max = 50)], render_kw = {"placeholder": "Validation Code"})
     submit = SubmitField("Register")
 
     def validate_username(self, username):
@@ -481,15 +482,18 @@ def register():
     if request.method == "POST":
         if form.validate_on_submit():
             # hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8", "ignore")
-            new_user = User(
-                username = form.username.data,
-                password = form.password.data
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            flash(f'Account successfully created! Please login now!',
-                category='success')
-            return redirect(url_for('login'))
+            if form.validationCode.data == "SerenityNewUser123":
+                new_user = User(
+                    username = form.username.data,
+                    password = form.password.data
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f'Account successfully created! Please login now!',
+                    category='success')
+                return redirect(url_for('login'))
+            else:
+                flash(f'Invalid Validation Code!', category = 'danger')
         else:
             flash_errors(form)
     return render_template('register.html', form = form)
