@@ -41,9 +41,9 @@ s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 
 # Initialize the application
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
 # Config Key
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
